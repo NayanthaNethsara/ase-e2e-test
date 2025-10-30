@@ -2,10 +2,10 @@ name: Playwright E2E Tests - All User Types
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main, master, develop]
   pull_request:
-    branches: [ main, master, develop ]
-  workflow_dispatch:  # Allow manual trigger
+    branches: [main, master, develop]
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
   test:
@@ -15,8 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]  # Can add: macos-latest, windows-latest
-        
+        os: [ubuntu-latest] # Can add: macos-latest, windows-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,8 +24,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -40,7 +40,7 @@ jobs:
 
       - name: Run all user type tests
         run: npm run test:all-users
-        continue-on-error: true  # Continue even if tests fail (some failures expected for problem_user)
+        continue-on-error: true # Continue even if tests fail (some failures expected for problem_user)
 
       - name: Upload HTML Report
         if: always()
@@ -103,7 +103,7 @@ jobs:
       contents: read
       pages: write
       id-token: write
-    
+
     steps:
       - name: Download HTML Report
         uses: actions/download-artifact@v4
@@ -128,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-      
+
     steps:
       - name: Download Test Results
         uses: actions/download-artifact@v4
