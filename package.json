@@ -7,6 +7,11 @@
     "test": "npx playwright test",
     "test:headless": "npx playwright test --reporter=list",
     "test:headed": "npx playwright test --headed --reporter=list",
+    "test:standard": "npx playwright test tests/standard-user.spec.js",
+    "test:locked": "npx playwright test tests/locked-out-user.spec.js",
+    "test:problem": "npx playwright test tests/problem-user.spec.js",
+    "test:performance": "npx playwright test tests/performance-glitch-user.spec.js",
+    "test:all-users": "npx playwright test tests/*-user.spec.js",
     "install-browsers": "npx playwright install --with-deps"
   },
   "keywords": [],
