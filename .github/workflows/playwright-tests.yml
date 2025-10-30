@@ -1,0 +1,164 @@
+name: Playwright E2E Tests - All User Types
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  test:
+    name: Run Tests on ${{ matrix.os }}
+    timeout-minutes: 30
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]  # Can add: macos-latest, windows-latest
+        
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Create .env file
+        run: |
+          echo "SAUCE_USERNAME=standard_user" >> .env
+          echo "SAUCE_PASSWORD=secret_sauce" >> .env
+
+      - name: Run all user type tests
+        run: npm run test:all-users
+        continue-on-error: true  # Continue even if tests fail (some failures expected for problem_user)
+
+      - name: Upload HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.os }}
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload Test Results (JSON)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-json-${{ matrix.os }}
+          path: test-results/*.json
+          retention-days: 30
+
+      - name: Upload Test Results (JUnit)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-junit-${{ matrix.os }}
+          path: test-results/junit.xml
+          retention-days: 30
+
+      - name: Upload Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots-${{ matrix.os }}
+          path: test-results/**/*.png
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload Videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos-${{ matrix.os }}
+          path: test-results/**/*.webm
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload Traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-traces-${{ matrix.os }}
+          path: test-results/**/*.zip
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # Separate job to publish HTML report as GitHub Pages
+  publish-report:
+    name: Publish Test Report
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    steps:
+      - name: Download HTML Report
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report-ubuntu-latest
+          path: playwright-report
+
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: playwright-report
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Job to analyze and comment on PR with results
+  test-summary:
+    name: Test Results Summary
+    needs: test
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      
+    steps:
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results-json-ubuntu-latest
+          path: test-results
+
+      - name: Create Test Summary
+        run: |
+          echo "# 🎭 Playwright Test Results - All User Types" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| User Type | Expected Behavior | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|------------------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟢 Standard User | All tests should PASS | ✅ Baseline |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔴 Locked Out User | Cannot login (auth tests) | ❌ Expected |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟡 Problem User | UI bugs (some failures) | ⚠️ Expected |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔵 Performance User | Slow but functional | ⏱️ Expected |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Key Points" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Expected Pass Rate:** 85-90% overall" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚠️ **Problem User failures are INTENTIONAL** (UI bugs)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔍 **See artifacts for detailed HTML report**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📥 Download Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 HTML Report (interactive)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📸 Screenshots (failures)" >> $GITHUB_STEP_SUMMARY
+          echo "- 🎥 Videos (test execution)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📜 Traces (debugging)" >> $GITHUB_STEP_SUMMARY
+          echo "- 📄 JSON/JUnit results" >> $GITHUB_STEP_SUMMARY

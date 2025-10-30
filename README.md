@@ -6,12 +6,12 @@ Comprehensive end-to-end testing suite for [SauceDemo](https://www.saucedemo.com
 
 Tests are **organized by user type**, with each user having **distinct expected behaviors**:
 
-| User Type | Behavior | Expected Results |
-|-----------|----------|------------------|
-| `standard_user` | ✅ Baseline - all features work | 100% tests should PASS |
-| `locked_out_user` | ❌ Cannot login | Auth error tests PASS |
-| `problem_user` | ⚠️ Has UI bugs (intentional) | Some tests MEANT TO FAIL |
-| `performance_glitch_user` | ⏱️ Very slow (5+ sec delays) | Tests PASS but take longer |
+| User Type                 | Behavior                        | Expected Results           |
+| ------------------------- | ------------------------------- | -------------------------- |
+| `standard_user`           | ✅ Baseline - all features work | 100% tests should PASS     |
+| `locked_out_user`         | ❌ Cannot login                 | Auth error tests PASS      |
+| `problem_user`            | ⚠️ Has UI bugs (intentional)    | Some tests MEANT TO FAIL   |
+| `performance_glitch_user` | ⏱️ Very slow (5+ sec delays)    | Tests PASS but take longer |
 
 **Key Insight:** Not all test failures indicate bugs! See [EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md)
 
@@ -27,27 +27,32 @@ Tests are **organized by user type**, with each user having **distinct expected 
 ## 🚀 Quick Start
 
 ### 1. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 2. Set Up Environment Variables
+
 ```bash
 cp .env.example .env
 ```
 
 Edit `.env` (default values work for SauceDemo):
+
 ```env
 SAUCE_USERNAME=standard_user
 SAUCE_PASSWORD=secret_sauce
 ```
 
 ### 3. Install Playwright Browsers
+
 ```bash
 npm run install-browsers
 ```
 
 ### 4. Run Tests
+
 ```bash
 # Run all user types in headless mode
 npm run test:all-users
@@ -60,6 +65,7 @@ npm run test:performance     # Performance glitch user
 ```
 
 ### 5. View Results
+
 ```bash
 npx playwright show-report
 ```
@@ -91,6 +97,7 @@ npx playwright show-report
 ## 🎯 Available Commands
 
 ### Run All Tests
+
 ```bash
 npm run test:headless        # All tests, headless mode
 npm run test:headed          # All tests, visible browsers
@@ -98,6 +105,7 @@ npm run test:all-users       # Only user-type tests
 ```
 
 ### Run Individual User Types
+
 ```bash
 npm run test:standard        # Standard user ✅
 npm run test:locked          # Locked out user ❌
@@ -106,6 +114,7 @@ npm run test:performance     # Performance user ⏱️
 ```
 
 ### Run Specific Browser
+
 ```bash
 npx playwright test --project=chromium
 npx playwright test --project=firefox
@@ -113,12 +122,14 @@ npx playwright test --project=webkit
 ```
 
 ### Debug Mode
+
 ```bash
 npx playwright test --debug
 npx playwright test tests/standard-user.spec.js --debug
 ```
 
 ### View Reports
+
 ```bash
 npx playwright show-report   # Interactive HTML report
 cat test-results/results.json  # JSON results
@@ -135,6 +146,7 @@ npx playwright show-report
 ```
 
 ### Report Features:
+
 - ✅ **Test results by user type** (passed/failed breakdown)
 - 📸 **Screenshots on failure** (automatically captured)
 - 🎥 **Video recordings** (failure replay)
@@ -144,12 +156,12 @@ npx playwright show-report
 
 ### Expected Results:
 
-| User Type | Expected Pass Rate | Notes |
-|-----------|-------------------|-------|
-| `standard_user` | 85-100% | Some known selector issues |
-| `locked_out_user` | 83-100% | Auth tests working correctly |
-| `problem_user` | 85-90% | **Failures are intentional** (UI bugs) |
-| `performance_glitch_user` | 85-100% | Slow but functional |
+| User Type                 | Expected Pass Rate | Notes                                  |
+| ------------------------- | ------------------ | -------------------------------------- |
+| `standard_user`           | 85-100%            | Some known selector issues             |
+| `locked_out_user`         | 83-100%            | Auth tests working correctly           |
+| `problem_user`            | 85-90%             | **Failures are intentional** (UI bugs) |
+| `performance_glitch_user` | 85-100%            | Slow but functional                    |
 
 📖 **Read [EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md) for detailed failure analysis!**
 
@@ -158,6 +170,7 @@ npx playwright show-report
 ## 🔍 Understanding Test Results
 
 ### ✅ Expected Failures (Working Correctly)
+
 ```
 ✅ locked_out_user cannot login → Security working!
 ✅ problem_user has broken images → Known UI bug!
@@ -165,6 +178,7 @@ npx playwright show-report
 ```
 
 ### ❌ Unexpected Failures (Needs Investigation)
+
 ```
 🚨 standard_user tests fail → Real bug or selector issue
 🚨 locked_out_user logs in → Security breach!
@@ -172,6 +186,7 @@ npx playwright show-report
 ```
 
 ### 📖 Read the Guides:
+
 - **[USER_BEHAVIOR_GUIDE.md](./USER_BEHAVIOR_GUIDE.md)** - Expected behavior per user
 - **[EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md)** - Which failures are OK
 - **[USER_TYPE_RESULTS.md](./USER_TYPE_RESULTS.md)** - Latest test results
@@ -181,28 +196,33 @@ npx playwright show-report
 ## 🐛 Debugging
 
 ### Run Specific Test
+
 ```bash
 npx playwright test -g "should login successfully"
 ```
 
 ### Debug Mode (Inspector)
+
 ```bash
 npx playwright test --debug
 npx playwright test tests/standard-user.spec.js --debug
 ```
 
 ### View Test Trace
+
 ```bash
 # Traces auto-captured on failure
 npx playwright show-trace test-results/*/trace.zip
 ```
 
 ### Run Specific User + Browser
+
 ```bash
 npx playwright test tests/problem-user.spec.js --project=firefox
 ```
 
 ### Headed Mode (See Browser)
+
 ```bash
 npx playwright test --headed
 ```
@@ -229,6 +249,7 @@ npx playwright test --headed
 ## 🎓 User Type Behaviors
 
 ### 1. Standard User (`standard_user`)
+
 **Expected:** All tests should PASS ✅
 
 ```javascript
@@ -246,6 +267,7 @@ npx playwright test --headed
 ---
 
 ### 2. Locked Out User (`locked_out_user`)
+
 **Expected:** Cannot login, auth tests PASS ✅
 
 ```javascript
@@ -260,6 +282,7 @@ npx playwright test --headed
 ---
 
 ### 3. Problem User (`problem_user`)
+
 **Expected:** Some tests WILL FAIL (UI bugs) ⚠️
 
 ```javascript
@@ -277,6 +300,7 @@ These demonstrate known UI bugs.
 ---
 
 ### 4. Performance Glitch User (`performance_glitch_user`)
+
 **Expected:** Tests PASS but take 5+ seconds ⏱️
 
 ```javascript
@@ -292,11 +316,11 @@ These demonstrate known UI bugs.
 
 ## 📚 Documentation
 
-| Document | Purpose |
-|----------|---------|
+| Document                                           | Purpose                              |
+| -------------------------------------------------- | ------------------------------------ |
 | [USER_BEHAVIOR_GUIDE.md](./USER_BEHAVIOR_GUIDE.md) | Expected behavior for each user type |
-| [EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md) | Detailed failure analysis guide |
-| [USER_TYPE_RESULTS.md](./USER_TYPE_RESULTS.md) | Latest test execution results |
+| [EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md)   | Detailed failure analysis guide      |
+| [USER_TYPE_RESULTS.md](./USER_TYPE_RESULTS.md)     | Latest test execution results        |
 
 ---
 
@@ -310,7 +334,55 @@ These demonstrate known UI bugs.
 
 ---
 
-## 📝 Notes
+## � CI/CD with GitHub Actions
+
+This project includes automated testing workflows:
+
+### Available Workflows
+
+1. **`playwright-tests.yml`** - Main workflow (runs on push/PR)
+
+   - Runs all user types across 3 browsers
+   - Publishes HTML report to GitHub Pages
+   - Uploads artifacts (screenshots, videos, traces)
+
+2. **`playwright-tests-matrix.yml`** - Matrix workflow (parallel execution)
+
+   - 12 parallel jobs (4 users × 3 browsers)
+   - Faster execution with granular results
+   - Individual artifacts per user-browser combo
+
+3. **`nightly-tests.yml`** - Scheduled complete test suite
+   - Runs daily at 2 AM UTC
+   - Creates GitHub issue on failure
+   - 90-day artifact retention
+
+### Setup GitHub Actions
+
+1. **Enable GitHub Pages:**
+
+   - Go to Settings → Pages
+   - Source: Select "GitHub Actions"
+   - HTML reports will be published to: `https://{username}.github.io/{repo-name}/`
+
+2. **Push workflows to GitHub:**
+
+   ```bash
+   git add .github/workflows/
+   git commit -m "Add GitHub Actions workflows"
+   git push
+   ```
+
+3. **View Results:**
+   - Actions tab → Select workflow run
+   - Download artifacts (reports, screenshots, videos)
+   - View deployed HTML report on GitHub Pages
+
+📖 **See [.github/workflows/README.md](./.github/workflows/README.md) for detailed workflow documentation**
+
+---
+
+## �📝 Notes
 
 - Tests run in **parallel with 4 workers** (one per user type)
 - Failed tests **auto-capture** screenshots, videos, and traces
