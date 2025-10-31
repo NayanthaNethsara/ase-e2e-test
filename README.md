@@ -1,431 +1,114 @@
-# 🎭 SauceDemo E2E Test Suite - Playwright
+# ASE E2E Test Suite
 
-Comprehensive end-to-end testing suite for [SauceDemo](https://www.saucedemo.com/v1/index.html) using [Playwright](https://playwright.dev/).
+End-to-end tests for Swag Labs (saucedemo) using Playwright. The suite exercises common user journeys across multiple user archetypes and browsers, producing rich HTML/JSON/JUnit reports and on-failure traces/screenshots/videos.
 
-## 🎯 What Makes This Special
+- Test runner: Playwright Test (`@playwright/test`)
+- Target site: Swag Labs — https://www.saucedemo.com (tests use explicit URLs)
+- Browsers: Chromium, Firefox, WebKit (run in parallel)
+- Test specs: `tests/*.spec.js` (standard, locked-out, problem, performance-glitch users)
 
-Tests are **organized by user type**, with each user having **distinct expected behaviors**:
+## Prerequisites
 
-| User Type                 | Behavior                        | Expected Results           |
-| ------------------------- | ------------------------------- | -------------------------- |
-| `standard_user`           | ✅ Baseline - all features work | 100% tests should PASS     |
-| `locked_out_user`         | ❌ Cannot login                 | Auth error tests PASS      |
-| `problem_user`            | ⚠️ Has UI bugs (intentional)    | Some tests MEANT TO FAIL   |
-| `performance_glitch_user` | ⏱️ Very slow (5+ sec delays)    | Tests PASS but take longer |
+- Node.js 18+ and npm
 
-**Key Insight:** Not all test failures indicate bugs! See [EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md)
+## Setup
 
----
-
-## 📋 Prerequisites
-
-- **Node.js** v16 or higher
-- **npm** (comes with Node.js)
-
----
-
-## 🚀 Quick Start
-
-### 1. Install Dependencies
-
-```bash
+```zsh
+# 1) Install dependencies
 npm install
-```
 
-### 2. Set Up Environment Variables
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` (default values work for SauceDemo):
-
-```env
-SAUCE_USERNAME=standard_user
-SAUCE_PASSWORD=secret_sauce
-```
-
-### 3. Install Playwright Browsers
-
-```bash
+# 2) Install Playwright browsers and required system deps
 npm run install-browsers
 ```
 
-### 4. Run Tests
+## Run tests
 
-```bash
-# Run all user types in headless mode
-npm run test:all-users
+All commands run in headless mode by default unless noted.
 
-# Or run specific user type
-npm run test:standard        # Standard user baseline
-npm run test:locked          # Locked out user
-npm run test:problem         # Problem user (expect some failures)
-npm run test:performance     # Performance glitch user
-```
+```zsh
+# Run the full suite across all three browsers
+npm test
 
-### 5. View Results
+# Run in headed mode for debugging
+npm run test:headed
 
-```bash
-npx playwright show-report
-```
+# Run in headless mode with list reporter only
+npm run test:headless
 
----
-
-## 📁 Project Structure
-
-```
-.
-├── tests/
-│   ├── example.spec.js                 # Example tests (example.com)
-│   ├── standard-user.spec.js           # ✅ Baseline user (all pass)
-│   ├── locked-out-user.spec.js         # ❌ Auth tests (login fails)
-│   ├── problem-user.spec.js            # ⚠️ UI bugs (some failures)
-│   └── performance-glitch-user.spec.js # ⏱️ Slow tests (5+ sec delays)
-├── playwright.config.js                # Playwright configuration
-├── package.json                        # Dependencies & scripts
-├── .env                                # Credentials (git-ignored)
-├── .env.example                        # Template for credentials
-├── README.md                           # This file
-├── USER_BEHAVIOR_GUIDE.md              # Expected behaviors per user
-├── EXPECTED_BEHAVIORS.md               # Failure analysis guide
-└── USER_TYPE_RESULTS.md                # Latest test results
-```
-
----
-
-## 🎯 Available Commands
-
-### Run All Tests
-
-```bash
-npm run test:headless        # All tests, headless mode
-npm run test:headed          # All tests, visible browsers
-npm run test:all-users       # Only user-type tests
-```
-
-### Run Individual User Types
-
-```bash
-npm run test:standard        # Standard user ✅
-npm run test:locked          # Locked out user ❌
-npm run test:problem         # Problem user ⚠️
-npm run test:performance     # Performance user ⏱️
-```
-
-### Run Specific Browser
-
-```bash
+# Scope to a single browser (examples)
 npx playwright test --project=chromium
 npx playwright test --project=firefox
 npx playwright test --project=webkit
+
+# Run a single spec by user type
+npm run test:standard      # tests/standard-user.spec.js
+npm run test:locked        # tests/locked-out-user.spec.js
+npm run test:problem       # tests/problem-user.spec.js
+npm run test:performance   # tests/performance-glitch-user.spec.js
+
+# Run all *-user specs
+npm run test:all-users
 ```
 
-### Debug Mode
+## Reporting and artifacts
 
-```bash
-npx playwright test --debug
-npx playwright test tests/standard-user.spec.js --debug
-```
+- HTML report: `playwright-report/index.html` (auto-generated). You can also open via:
+  ```zsh
+  npx playwright show-report
+  ```
+- Machine-readable outputs in `test-results/`:
+  - `results.json` and `junit.xml`
+  - Per-user JSON files: `standard-user.json`, `locked-out-user.json`, `problem-user.json`, `performance-glitch-user.json`
+- Artifacts on failure (as configured in `playwright.config.js`):
+  - Trace: `retain-on-failure`
+  - Screenshot: `only-on-failure`
+  - Video: `retain-on-failure`
 
-### View Reports
+## Project configuration highlights
 
-```bash
-npx playwright show-report   # Interactive HTML report
-cat test-results/results.json  # JSON results
-```
+`playwright.config.js`:
 
----
+- Fully parallel tests; 4 workers locally (1 on CI)
+- Retries: 2 on CI, 0 locally
+- Projects: chromium, firefox, webkit (Desktop profiles)
 
-## 📊 Test Reports
+Notes:
 
-After running tests, view the comprehensive HTML report:
+- Tests call Swag Labs with full URLs directly (e.g., `https://www.saucedemo.com/v1/index.html`), so no base URL configuration is required.
 
-```bash
-npx playwright show-report
-```
+## Typical scenarios covered
 
-### Report Features:
+The suite includes specs for different user personas:
 
-- ✅ **Test results by user type** (passed/failed breakdown)
-- 📸 **Screenshots on failure** (automatically captured)
-- 🎥 **Video recordings** (failure replay)
-- 📜 **Execution traces** (detailed debugging)
-- ⏱️ **Performance metrics** (timing analysis)
-- 🔍 **Separate JSON reports** per user type
+- Standard user flows (e.g., navigation, cart/checkout, menus)
+- Locked-out user behavior (access restrictions)
+- Problem user visual/content issues
+- Performance-glitch user (validates flows under slower conditions)
 
-### Expected Results:
+Check the spec files in `tests/` for exact steps:
 
-| User Type                 | Expected Pass Rate | Notes                                  |
-| ------------------------- | ------------------ | -------------------------------------- |
-| `standard_user`           | 85-100%            | Some known selector issues             |
-| `locked_out_user`         | 83-100%            | Auth tests working correctly           |
-| `problem_user`            | 85-90%             | **Failures are intentional** (UI bugs) |
-| `performance_glitch_user` | 85-100%            | Slow but functional                    |
+- `locked-out-user.spec.js`
+- `performance-glitch-user.spec.js`
+- `problem-user.spec.js`
+- `standard-user.spec.js`
 
-📖 **Read [EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md) for detailed failure analysis!**
+### Test users used in specs
 
----
+- `standard_user` / `secret_sauce`
+- `locked_out_user` / `secret_sauce`
+- `problem_user` / `secret_sauce`
+- `performance_glitch_user` / `secret_sauce`
 
-## 🔍 Understanding Test Results
+## Troubleshooting
 
-### ✅ Expected Failures (Working Correctly)
+- Tests immediately fail with navigation errors:
+  - Ensure https://www.saucedemo.com is reachable from your machine.
+- WebKit/platform dependencies:
+  - If browser install fails, rerun `npm run install-browsers` and ensure Xcode Command Line Tools are installed on macOS.
+- Slow or flaky locally:
+  - Try `--project=chromium` or run headed to observe timings: `npm run test:headed`.
 
-```
-✅ locked_out_user cannot login → Security working!
-✅ problem_user has broken images → Known UI bug!
-✅ performance_glitch_user is slow → Performance issue confirmed!
-```
+## Useful references
 
-### ❌ Unexpected Failures (Needs Investigation)
-
-```
-🚨 standard_user tests fail → Real bug or selector issue
-🚨 locked_out_user logs in → Security breach!
-🚨 problem_user has no bugs → Bug was fixed?
-```
-
-### 📖 Read the Guides:
-
-- **[USER_BEHAVIOR_GUIDE.md](./USER_BEHAVIOR_GUIDE.md)** - Expected behavior per user
-- **[EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md)** - Which failures are OK
-- **[USER_TYPE_RESULTS.md](./USER_TYPE_RESULTS.md)** - Latest test results
-
----
-
-## 🐛 Debugging
-
-### Run Specific Test
-
-```bash
-npx playwright test -g "should login successfully"
-```
-
-### Debug Mode (Inspector)
-
-```bash
-npx playwright test --debug
-npx playwright test tests/standard-user.spec.js --debug
-```
-
-### View Test Trace
-
-```bash
-# Traces auto-captured on failure
-npx playwright show-trace test-results/*/trace.zip
-```
-
-### Run Specific User + Browser
-
-```bash
-npx playwright test tests/problem-user.spec.js --project=firefox
-```
-
-### Headed Mode (See Browser)
-
-```bash
-npx playwright test --headed
-```
-
----
-
-## 🔍 Features
-
-- ✅ **Multi-browser testing** (Chromium, Firefox, WebKit)
-- ✅ **Parallel execution** with 4 workers (one per user type)
-- ✅ **Separate test files** per user type
-- ✅ **Headless and headed modes**
-- ✅ **Environment variables** for credentials
-- ✅ **Auto screenshots** on failure
-- ✅ **Video recording** on failure
-- ✅ **Execution traces** for debugging
-- ✅ **HTML reports** with rich details
-- ✅ **JSON reports** per user type
-- ✅ **JUnit XML** for CI/CD integration
-- ✅ **Performance measurement** (performance_glitch_user)
-
----
-
-## 🎓 User Type Behaviors
-
-### 1. Standard User (`standard_user`)
-
-**Expected:** All tests should PASS ✅
-
-```javascript
-✅ Login successful
-✅ View all 6 products
-✅ Sorting works (4 variations)
-✅ Cart operations work
-✅ Checkout completes
-✅ Navigation & logout work
-✅ Normal performance
-```
-
-**If ANY test fails → Investigate!** 🚨
-
----
-
-### 2. Locked Out User (`locked_out_user`)
-
-**Expected:** Cannot login, auth tests PASS ✅
-
-```javascript
-❌ Login → Shows "user has been locked out" error
-✅ Error message displays correctly
-✅ Remains on login page
-✅ Cannot access features
-```
-
-**Login should NEVER work for this user!**
-
----
-
-### 3. Problem User (`problem_user`)
-
-**Expected:** Some tests WILL FAIL (UI bugs) ⚠️
-
-```javascript
-✅ Can login
-❌ Product images broken (dog images instead)
-❌ Images missing src attribute
-⚠️ Cart items may show wrong products
-✅ Sorting works (surprisingly!)
-✅ Basic navigation works
-```
-
-**Failures for problem_user are INTENTIONAL!**  
-These demonstrate known UI bugs.
-
----
-
-### 4. Performance Glitch User (`performance_glitch_user`)
-
-**Expected:** Tests PASS but take 5+ seconds ⏱️
-
-```javascript
-✅ Login works (but takes 5+ seconds)
-✅ All features work (very slow)
-⏱️ Every action delayed by 5 seconds
-❌ Performance tests fail (slowness confirmed)
-```
-
-**Slowness is the feature being tested!**
-
----
-
-## 📚 Documentation
-
-| Document                                           | Purpose                              |
-| -------------------------------------------------- | ------------------------------------ |
-| [USER_BEHAVIOR_GUIDE.md](./USER_BEHAVIOR_GUIDE.md) | Expected behavior for each user type |
-| [EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md)   | Detailed failure analysis guide      |
-| [USER_TYPE_RESULTS.md](./USER_TYPE_RESULTS.md)     | Latest test execution results        |
-
----
-
-## 🤝 Contributing
-
-1. Create new test file in `tests/` directory
-2. Follow existing user-specific patterns
-3. Run tests locally: `npm run test:all-users`
-4. Ensure tests pass in all browsers (or document expected failures)
-5. Update documentation if adding new user types
-
----
-
-## � CI/CD with GitHub Actions
-
-This project includes automated testing workflows:
-
-### Available Workflows
-
-1. **`playwright-tests.yml`** - Main workflow (runs on push/PR)
-
-   - Runs all user types across 3 browsers
-   - Publishes HTML report to GitHub Pages
-   - Uploads artifacts (screenshots, videos, traces)
-
-2. **`playwright-tests-matrix.yml`** - Matrix workflow (parallel execution)
-
-   - 12 parallel jobs (4 users × 3 browsers)
-   - Faster execution with granular results
-   - Individual artifacts per user-browser combo
-
-3. **`nightly-tests.yml`** - Scheduled complete test suite
-   - Runs daily at 2 AM UTC
-   - Creates GitHub issue on failure
-   - 90-day artifact retention
-
-### Setup GitHub Actions
-
-1. **Enable GitHub Pages:**
-
-   - Go to Settings → Pages
-   - Source: Select "GitHub Actions"
-   - HTML reports will be published to: `https://{username}.github.io/{repo-name}/`
-
-2. **Push workflows to GitHub:**
-
-   ```bash
-   git add .github/workflows/
-   git commit -m "Add GitHub Actions workflows"
-   git push
-   ```
-
-3. **View Results:**
-   - Actions tab → Select workflow run
-   - Download artifacts (reports, screenshots, videos)
-   - View deployed HTML report on GitHub Pages
-
-📖 **See [.github/workflows/README.md](./.github/workflows/README.md) for detailed workflow documentation**
-
----
-
-## �📝 Notes
-
-- Tests run in **parallel with 4 workers** (one per user type)
-- Failed tests **auto-capture** screenshots, videos, and traces
-- Each user type has its **own test file** and expected behaviors
-- **`problem_user` failures are intentional** (UI bugs)
-- **`performance_glitch_user` has 5+ second delays**
-- Increase timeouts in `playwright.config.js` if needed
-- Use `.env` file for credentials (**never commit this file**)
-- SauceDemo v1 limitations: No auth on direct URL access
-
----
-
-## 🎯 Example Output
-
-```bash
-$ npm run test:all-users
-
-Running 102 tests using 4 workers
-
-  ✅ 36 passed in standard-user.spec.js
-  ✅ 10 passed in locked-out-user.spec.js
-  ⚠️  24 passed, 3 failed in problem-user.spec.js (failures expected)
-  ✅ 18 passed in performance-glitch-user.spec.js
-
-  87 passed, 15 failed (85.3% pass rate)
-  Duration: 2m 18s
-```
-
----
-
-## 📞 Support
-
-- **Test failing unexpectedly?** Check [EXPECTED_BEHAVIORS.md](./EXPECTED_BEHAVIORS.md)
-- **Not sure which user to test?** See [USER_BEHAVIOR_GUIDE.md](./USER_BEHAVIOR_GUIDE.md)
-- **Need test results?** Read [USER_TYPE_RESULTS.md](./USER_TYPE_RESULTS.md)
-- **Playwright docs:** https://playwright.dev/
-
----
-
-## 📄 License
-
-ISC
-
----
-
-**Remember:** Not all failures are bugs! Some are expected behaviors. 🎭
+- Playwright Test docs: https://playwright.dev/docs/test-intro
+- CLI reference: https://playwright.dev/docs/test-cli
