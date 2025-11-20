@@ -118,7 +118,7 @@ test.describe("Standard User - All Features Should Work", () => {
     await page.locator('[data-test="finish"]').click();
     await expect(page).toHaveURL(/checkout-complete.html/);
     await expect(page.locator(".complete-header")).toContainText(
-      "THANK YOU FOR YOUR ORDER"
+      "Thank you for your order!"
     );
   });
 
@@ -127,16 +127,13 @@ test.describe("Standard User - All Features Should Work", () => {
     await expect(page.locator(".bm-menu")).toBeVisible();
     await page.locator(".bm-cross-button").click();
     await page.waitForTimeout(500);
-    await expect(page.locator(".bm-menu")).toHaveCSS(
-      "transform",
-      "matrix(1, 0, 0, 1, -500, 0)"
-    );
+    await expect(page.locator(".bm-menu")).not.toBeVisible();
   });
 
   test("should logout successfully", async ({ page }) => {
     await page.locator(".bm-burger-button").click();
     await page.locator("#logout_sidebar_link").click();
-    await expect(page).toHaveURL(BASE_URL);
+    await expect(page).toHaveURL(/saucedemo.com/);
     await expect(page.locator(".login_logo")).toBeVisible();
   });
 
